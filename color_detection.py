@@ -1,4 +1,3 @@
-import streamlit as st
 import cv2
 import numpy as np
 import pandas as pd
@@ -9,7 +8,7 @@ csv_path = "colors.csv"
 index = ["color", "color_name", "hex", "R", "G", "B"]
 csv = pd.read_csv(csv_path, names=index, header=None)
 
-def getColorName(R, G, B):
+def get_color_name(R, G, B):
     """Find the closest color name from the dataset."""
     min_dist = float("inf")
     cname = "Unknown"
@@ -22,31 +21,12 @@ def getColorName(R, G, B):
             hex_val = csv.loc[i, "hex"]
     return cname, hex_val
 
-st.title("🎨 Real-Time Color Detection")
-
-# Start webcam
-camera = st.camera_input("Capture an image for color detection")
-
-if camera:
-    # Convert image for OpenCV
-    img = Image.open(camera)
-    img = np.array(img)
-
-    # Get the center pixel color
+def detect_color(image):
+    """Process an image and return detected color information."""
+    img = np.array(image)
     height, width, _ = img.shape
     center_x, center_y = width // 2, height // 2
     b, g, r = img[center_y, center_x]
-
-    # Get color name
-    color_name, hex_value = getColorName(r, g, b)
-
-    # Display results
-    st.subheader(f"Detected Color: {color_name}")
-    st.markdown(f"**HEX:** {hex_value} | **RGB:** ({r}, {g}, {b})")
-    st.image(img, caption="Captured Image", use_column_width=True)
-
-    # Show detected color block
-    st.markdown(
-        f'<div style="width:100px; height:100px; background-color:{hex_value}; border-radius:10px"></div>',
-        unsafe_allow_html=True,
-    )
+    color_name, hex_value = get_color_name(r, g, b)
+    
+    return color_name, hex_value, (r, g, b), img
